@@ -32,10 +32,12 @@ class RMTP():
             self.akari = AkariClient(acc)
             self.joints = self.akari.joints
             self.joints.set_joint_velocities(pan=6, tilt=6)
+            self.joints.set_servo_enabled(pan=True, tilt=True)
         else:#本体からのインスタンス化
             self.akari = AkariClient()
             self.joints = self.akari.joints
             self.joints.set_joint_velocities(pan=6, tilt=6)
+            self.joints.set_servo_enabled(pan=True, tilt=True)
             
         
     
