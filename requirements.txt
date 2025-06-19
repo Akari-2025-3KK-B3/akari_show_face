@@ -1,0 +1,5 @@
+akari-client[depthai]
+akari-proto
+opencv-python
+depthai
+ipython
