@@ -4,7 +4,6 @@
 from akari_client import AkariClient
 import depthai as dai
 import cv2
-from IPython.display import display, Image
 import random
 import time
 import threading
@@ -26,6 +25,11 @@ class RMTP():
         cam_rgb.preview.link(xout_rgb.input)
         # OAK-Dがあるかどうかを確認(本体や外部PCとOAK-Dを接続すればTrueになるはず)
         self.oak_available = len(dai.Device.getAllConnectedDevices()) > 0
+
+        self.device=None
+        if self.oak_available:
+            self.device=dai.Device(self.pipeline)
+            self.video=self.device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
 
         #外部PCの場合のAkariClientのインスタンス化
         if acc != None:
@@ -54,17 +58,17 @@ class RMTP():
             
     #画像取得
     def akari_take_picture(self)->None:
-        if not self.oak_available:
+        if not self.oak_available or self.device is None:
             print("⚠️このPCにOAK-Dが接続されていないため、撮影はスキップします。")
             return
         
-        # ディスプレイを設定
-        display_handle=display(None, display_id=True)
-        # デバイスをパイプラインに接続
-        with dai.Device(self.pipeline) as device:
-            # フレームを取得して表示
-            video = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-            frame = video.get().getCvFrame()
-            _, jpg = cv2.imencode('.jpeg', frame)
-            img = Image(data=jpg.tobytes())
-            display_handle.update(img)
+        frame = self.video.get().getCvFrame()
+        # _, jpg = cv2.imencode('.jpeg', frame)
+        # img = Image(data=jpg.tobytes())
+        # display_handle.update(img)
+        cv2.imshow("debug picture", frame)
+        cv2.waitKey(0)
+
+    def close(self):
+        if self.device:
+            self.device.close()
