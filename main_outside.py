@@ -20,7 +20,7 @@ def main() -> None:
    """
    # AKARI本体のIPアドレスを指定する。
    # 実際のAKARIのIPアドレスに合わせて変更すること。
-   akari_ip = "172.31.14.11"#ドロピク
+   akari_ip = "172.31.14.13"#ドロピク
    # portは初期設定のままであれば51001固定
    akari_port = "51001"
    akari_endpoint = f"{akari_ip}:{akari_port}"
