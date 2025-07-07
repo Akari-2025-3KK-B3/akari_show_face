@@ -2,6 +2,8 @@
 #本体と外部PCとの共通コード
 
 from akari_client import AkariClient
+from akari_client.color import Color, Colors
+from akari_client.position import Positions
 import depthai as dai
 import cv2
 import random
@@ -22,9 +24,7 @@ class Media():
 
         # OAK-Dのパイプライン作成
         self.pipeline = dai.Pipeline()
-        # face = FACE(self.pipeline)
 
-        # ソースとアウトプットの設定
         # --- camera settings ---
         cam_rgb = self.pipeline.createColorCamera()
         self.WIDTH = 300
@@ -43,20 +43,52 @@ class Media():
         if self.oak_available:
             self.device=dai.Device(self.pipeline)
             self.video=self.device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-            # self.nn_output = self.device.getOutputQueue(name="nn", maxSize=4, blocking=False)
 
         #外部PCの場合のAkariClientのインスタンス化
         if acc != None:
             self.akari = AkariClient(acc)
-            self.joints = self.akari.joints
-            self.joints.set_joint_velocities(pan=3, tilt=3)
-            self.joints.set_servo_enabled(pan=True, tilt=True)
         else:#本体からのインスタンス化
             self.akari = AkariClient()
-            self.joints = self.akari.joints
-            self.joints.set_joint_velocities(pan=8, tilt=8)
-            self.joints.set_servo_enabled(pan=True, tilt=True)
             
+        
+        #self.m5の設定
+        self.m5=self.akari.m5stack
+        self.joints = self.akari.joints
+        self.joints.set_servo_enabled(pan=True, tilt=True)
+
+        self.m5.set_display_text(text="難易度を設定してください",size=2, pos_x=Positions.CENTER, pos_y=Positions.CENTER)
+        self.m5.set_display_text(text="弱", pos_x=Positions.LEFT, pos_y=Positions.BOTTOM, refresh=False)
+        self.m5.set_display_text(text="中", pos_x=Positions.CENTER, pos_y=Positions.BOTTOM, refresh=False)
+        self.m5.set_display_text(text="強", pos_x=Positions.RIGHT, pos_y=Positions.BOTTOM, refresh=False)
+        #速度の設定
+        for i in range(9):
+            self.m5.set_display_text(str(len(range(9))-i), pos_x=Positions.RIGHT, pos_y=Positions.TOP, refresh=False)
+
+            data=self.m5.get()
+            if data["button_a"]:
+                self.joints.set_joint_velocities(pan=4, tilt=4)
+                self.m5.set_display_text(text="弱", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
+                time.sleep(1)
+                break
+            elif data["button_b"]:
+                self.joints.set_joint_velocities(pan=6, tilt=6)
+                self.m5.set_display_text(text="中", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
+                time.sleep(1)
+                break
+            elif data["button_c"]:
+                self.joints.set_joint_velocities(pan=8, tilt=8)
+                self.m5.set_display_text(text="強", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
+                time.sleep(1)
+                break
+
+            time.sleep(1)
+
+
+        for i in range(3):
+            self.m5.set_display_text(str(len(range(3))-i), size=10)
+            time.sleep(1)
+            if i==2:
+                self.m5.set_display_text("")
         
     
     #ランダムに首を動かす
@@ -69,7 +101,7 @@ class Media():
             rtilt = random.uniform(-0.5,0.5)
             self.joints.move_joint_positions(pan=rpan, tilt=rtilt)
             time.sleep(0.7)
-        # time.sleep(0.5)
+        time.sleep(0.5)
         self.akari_take_picture()
 
 
@@ -100,6 +132,7 @@ class Media():
                 h,w,_=frame.shape
                 x,y,width,height=int(bbox.xmin*w), int(bbox.ymin*h), int(bbox.width*w), int(bbox.height*h)
                 cv2.rectangle(frame, (x,y), (x+width, y+height), (0, 255, 0), 2)
+            self.akari_random_move()
 
         cv2.imshow("debug picture", frame)
         cv2.waitKey(0)
