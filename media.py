@@ -8,12 +8,13 @@ import depthai as dai
 import cv2
 import random
 import time
-import numpy as np
 import mediapipe as mp
 
 class Media():
 
     def __init__(self, acc=None) -> None:
+        #回数カウント変数
+        self.suc_cnt=0
 
          #--mediapipe settings--
         self.mp_pose=mp.solutions.pose
@@ -126,6 +127,8 @@ class Media():
 
         #顔検出描画
         if result_face.detections:
+            self.suc_cnt+=1
+            self.m5.set_display_text(str(self.suc_cnt), size=10, pos_x=Positions.CENTER, pos_y=Positions.CENTER)
             print("顔あり")
             for detection in result_face.detections:
                 bbox=detection.location_data.relative_bounding_box
@@ -133,21 +136,10 @@ class Media():
                 x,y,width,height=int(bbox.xmin*w), int(bbox.ymin*h), int(bbox.width*w), int(bbox.height*h)
                 cv2.rectangle(frame, (x,y), (x+width, y+height), (0, 255, 0), 2)
             self.akari_random_move()
-
+        
         cv2.imshow("debug picture", frame)
         cv2.waitKey(0)
-       
-        """
-        上記は簡易版
-        画像を操作する際にバウンディングボックスを用いているが，
-        下記は，そのボックスのサイズ等を複数準備することで，
-        様々なサイズの顔などに柔軟い，かつ精度高く判定を行うイメージ
-        """
-        # prior_box.pyを使用する場合　(参考:face_detection)
-        # pb = PriorBox(
-        #     input_shape=(self.WIDTH, self.HEIGHT),
-        #     output_shape=(frame.shape[1], frame.shape[0])
-        # )
+
 
     def close(self):
         if self.device:
