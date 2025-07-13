@@ -10,12 +10,14 @@ import random
 import time
 import mediapipe as mp
 
+
 class Media():
 
     def __init__(self, acc=None) -> None:
         #回数カウント変数
         self.suc_cnt=0
-
+        #hellモードフラッグ
+        self.hell_flag=False
          #--mediapipe settings--
         self.mp_pose=mp.solutions.pose
         mp_face=mp.solutions.face_detection
@@ -81,6 +83,10 @@ class Media():
                 self.m5.set_display_text(text="強", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
                 time.sleep(1)
                 break
+            else:
+                self.m5.set_display_text(text="Hell", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
+                self.hell_flag=True
+                time.sleep(1)
 
             time.sleep(1)
 
@@ -98,6 +104,12 @@ class Media():
         loop_num = int(random.uniform(1,10))
         # loop_num = 0
         for i in range(loop_num):
+
+            #hellの場合速度をランダムにする
+            if self.hell_flag:
+                ran=int(random.uniform(1,10))
+                self.joints.set_joint_velocities(pan=ran, tilt=ran)
+
             rpan = random.uniform(-1,1)
             rtilt = random.uniform(-0.5,0.5)
             self.joints.move_joint_positions(pan=rpan, tilt=rtilt)
