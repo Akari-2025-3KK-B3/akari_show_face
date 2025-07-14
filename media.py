@@ -157,6 +157,8 @@ class Media():
         cv2.imshow("debug picture", frame)
         cv2.waitKey(0)
 
+        self.joints.move_joint_positions(pan=0, tilt=0)
+
 
     def close(self):
         if self.device:
