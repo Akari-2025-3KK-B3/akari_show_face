@@ -16,8 +16,10 @@ class Media():
     def __init__(self, acc=None) -> None:
         #回数カウント変数
         self.suc_cnt=0
-        #hellモードフラッグ
+        #hell mode flag
         self.hell_flag=False
+        #難易度設定のフラッグ
+        self.level_flag=False
          #--mediapipe settings--
         self.mp_pose=mp.solutions.pose
         mp_face=mp.solutions.face_detection
@@ -69,25 +71,29 @@ class Media():
 
             data=self.m5.get()
             if data["button_a"]:
+                self.level_flag=True
                 self.joints.set_joint_velocities(pan=4, tilt=4)
                 self.m5.set_display_text(text="弱", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
                 time.sleep(1)
                 break
             elif data["button_b"]:
+                self.level_flag=True
                 self.joints.set_joint_velocities(pan=6, tilt=6)
                 self.m5.set_display_text(text="中", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
                 time.sleep(1)
                 break
             elif data["button_c"]:
+                self.level_flag=True
                 self.joints.set_joint_velocities(pan=8, tilt=8)
                 self.m5.set_display_text(text="強", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
                 time.sleep(1)
                 break
-            else:
-                self.m5.set_display_text(text="Hell", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
-                self.hell_flag=True
-                time.sleep(1)
+                
+            time.sleep(1)
 
+        if self.level_flag == False:
+            self.m5.set_display_text(text="Hell", pos_x=Positions.CENTER, pos_y=Positions.CENTER)
+            self.hell_flag=True
             time.sleep(1)
 
 
@@ -102,7 +108,6 @@ class Media():
     def akari_random_move(self)->None:
         #ランダムなループ
         loop_num = int(random.uniform(1,10))
-        # loop_num = 0
         for i in range(loop_num):
 
             #hellの場合速度をランダムにする
