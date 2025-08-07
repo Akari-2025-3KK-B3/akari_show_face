@@ -2,7 +2,6 @@
 #本体と外部PCとの共通コード
 
 from akari_client import AkariClient
-from akari_client.color import Color, Colors
 from akari_client.position import Positions
 import depthai as dai
 import cv2
@@ -21,9 +20,7 @@ class Media():
         #難易度設定のフラッグ
         self.level_flag=False
          #--mediapipe settings--
-        self.mp_pose=mp.solutions.pose
         mp_face=mp.solutions.face_detection
-        self.pose=self.mp_pose.Pose()
         self.face_detection=mp_face.FaceDetection(model_selection=0, min_detection_confidence=0.5)
 
 
@@ -133,14 +130,7 @@ class Media():
         # 映像取得・表示
         frame = self.video.get().getCvFrame()
         rgb_frame=cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        result_pose=self.pose.process(rgb_frame)
         result_face=self.face_detection.process(rgb_frame)
-
-        #ランドマーク描画
-        if result_pose.pose_landmarks:
-            mp.solutions.drawing_utils.draw_landmarks(
-                frame, result_pose.pose_landmarks, self.mp_pose.POSE_CONNECTIONS
-            )
 
         #顔検出描画
         if result_face.detections:
