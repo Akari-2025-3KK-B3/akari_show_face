@@ -1,5 +1,3 @@
-#random movement take picture
-#本体と外部PCとの共通コード
 
 from akari_client import AkariClient
 from akari_client.position import Positions
