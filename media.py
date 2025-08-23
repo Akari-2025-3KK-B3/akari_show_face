@@ -101,29 +101,37 @@ class Media():
     
     #ランダムに首を動かす
     def akari_random_move(self)->None:
-        #ランダムなループ
-        loop_num = int(random.uniform(1,10))
-        for i in range(loop_num):
+        
+        while True:
 
-            #hellの場合速度をランダムにする
-            if self.hell_flag:
-                ran=int(random.uniform(1,10))
-                self.joints.set_joint_velocities(pan=ran, tilt=ran)
+            #ランダムなループ
+            loop_num = int(random.uniform(1,10))
+            for i in range(loop_num):
 
-            rpan = random.uniform(-1,1)
-            rtilt = random.uniform(-0.5,0.5)
-            self.joints.move_joint_positions(pan=rpan, tilt=rtilt)
-            time.sleep(0.7)
-        time.sleep(0.5)
-        self.akari_take_picture()
+                #hellの場合速度をランダムにする
+                if self.hell_flag:
+                    ran=int(random.uniform(1,10))
+                    self.joints.set_joint_velocities(pan=ran, tilt=ran)
+
+                rpan = random.uniform(-1,1)
+                rtilt = random.uniform(-0.5,0.5)
+                self.joints.move_joint_positions(pan=rpan, tilt=rtilt)
+                time.sleep(0.7)
+            time.sleep(0.5)
+
+            #akari_take_pictureでboolを返す
+            #Trueの場合何もしない
+            #Falseの場合breakする
+            if not self.akari_take_picture():
+                break
 
 
 
     #画像取得
-    def akari_take_picture(self)->None:
+    def akari_take_picture(self)->bool:
         if not self.oak_available or self.device is None:
             print("⚠️このPCにOAK-Dが接続されていないため、撮影はスキップします。")
-            return
+            return False
         
         # 映像取得・表示
         frame = self.video.get().getCvFrame()
@@ -140,12 +148,14 @@ class Media():
                 h,w,_=frame.shape
                 x,y,width,height=int(bbox.xmin*w), int(bbox.ymin*h), int(bbox.width*w), int(bbox.height*h)
                 cv2.rectangle(frame, (x,y), (x+width, y+height), (0, 255, 0), 2)
-            self.akari_random_move()
         
-        cv2.imshow("debug picture", frame)
-        cv2.waitKey(0)
+            cv2.imshow("debug picture", frame)
+            cv2.waitKey(1)
+            #↑1にする
+            return True
 
         self.joints.move_joint_positions(pan=0, tilt=0)
+        return False
 
 
     def close(self):
